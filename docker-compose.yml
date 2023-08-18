@@ -1,0 +1,28 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: 'POSTGRES_DB'
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./:/docker-entrypoint-initdb.d/
+      # - pgdata:/var/lib/postgresql/data
+    ports:
+      - '1971:5432'
+
+  node:
+    container_name: 'NODE_SERVER'
+    image: node:18
+    depends_on:
+      - postgres
+    volumes:
+      - ./server:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+      - 80:3000
+    command: bash -c "npm install && npx tsc && npx prisma migrate dev --name init && npm start"
+# volumes:
+#   pgdata:
